@@ -11,7 +11,7 @@ import java.util.List;
 public class BookService {
     private final BookRepository repo;
 
-    public BookService(BookRepository repo) {
+    public BookService(BookRepository repo) { // BookRepo is injected
         this.repo = repo;
     }
 

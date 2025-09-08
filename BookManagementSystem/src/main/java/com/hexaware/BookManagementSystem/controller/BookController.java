@@ -13,25 +13,31 @@ import java.util.List;
 public class BookController {
     private final BookService service;
 
-    public BookController(BookService service) { this.service = service; }
+    public BookController(BookService service)  //here i have injected Bookservice using constructor
+    { this.service = service; }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public List<Book> getAll() { return service.getAll(); }
+    public List<Book> getAll()
+    { return service.getAll(); }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public Book getById(@PathVariable Long id) { return service.getById(id); }
+    public Book getById(@PathVariable Long id)  // id parameter is passes for getById
+    { return service.getById(id); }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Book create(@RequestBody BookDto dto) { return service.create(dto); }
+    public Book create(@RequestBody BookDto dto)
+    { return service.create(dto); }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Book update(@PathVariable Long id, @RequestBody BookDto dto) { return service.update(id, dto); }
+    public Book update(@PathVariable Long id, @RequestBody BookDto dto)
+    { return service.update(id, dto); }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Long id) { service.delete(id); }
+    public void delete(@PathVariable Long id)
+    { service.delete(id); }
 }

@@ -11,7 +11,7 @@ public class UserService {
     private final UserRepository repo;
     private final PasswordEncoder encoder;
 
-    public UserService(UserRepository repo, PasswordEncoder encoder) {
+    public UserService(UserRepository repo, PasswordEncoder encoder) { // userRepo and password encoder are injected. repo=jpa encoder= password encoding
         this.repo = repo;
         this.encoder = encoder;
     }
@@ -19,7 +19,7 @@ public class UserService {
     public User createUser(UserDto dto) {
         User user = User.builder()
                 .username(dto.getUsername())
-                .password(encoder.encode(dto.getPassword())) // BCrypt encoding
+                .password(encoder.encode(dto.getPassword())) // the password is hashed (by using PasswordEncoder)
                 .role(dto.getRole())
                 .build();
         return repo.save(user);

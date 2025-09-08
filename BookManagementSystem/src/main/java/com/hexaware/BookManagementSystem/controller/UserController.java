@@ -11,7 +11,7 @@ public class UserController {
 
     private final UserService service;
 
-    public UserController(UserService service) {
+    public UserController(UserService service) { // here i have injected UserSerivce by a constructor
         this.service = service;
     }
 
