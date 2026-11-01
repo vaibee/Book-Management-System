@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Book Management API Tester</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #202a35;
+            --muted: #647383;
+            --line: #dce3e8;
+            --paper: #ffffff;
+            --canvas: #f3f6f7;
+            --accent: #176b58;
+            --accent-dark: #105341;
+            --soft: #e7f2ef;
+            --danger: #a63b34;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--canvas);
+            color: var(--ink);
+        }
+
+        header {
+            padding: 28px max(24px, calc((100% - 1120px) / 2));
+            background: #173a35;
+            color: white;
+        }
+
+        header p { margin: 8px 0 0; color: #c7d9d4; }
+        h1 { margin: 0; font-size: clamp(1.45rem, 3vw, 2rem); }
+        h2 { margin: 0 0 18px; font-size: 1.15rem; }
+        h3 { margin: 0 0 14px; font-size: 1rem; }
+        main { max-width: 1120px; margin: 26px auto; padding: 0 20px 36px; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(300px, .75fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .stack { display: grid; gap: 18px; }
+        .card {
+            padding: 22px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 0 4px 14px #253a3510;
+        }
+
+        .hint { margin: -8px 0 18px; color: var(--muted); font-size: .9rem; line-height: 1.45; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .field { display: grid; gap: 6px; margin-bottom: 13px; }
+        .field.full { grid-column: 1 / -1; }
+        label { color: #354450; font-size: .86rem; font-weight: 600; }
+        input, select {
+            width: 100%;
+            min-height: 40px;
+            padding: 9px 11px;
+            border: 1px solid #cbd5dc;
+            border-radius: 7px;
+            background: #fff;
+            color: var(--ink);
+            font: inherit;
+        }
+        input:focus, select:focus { outline: 3px solid #176b5824; border-color: var(--accent); }
+        .actions { display: flex; flex-wrap: wrap; gap: 9px; }
+        button {
+            min-height: 38px;
+            padding: 8px 13px;
+            border: 1px solid var(--accent);
+            border-radius: 7px;
+            background: var(--accent);
+            color: white;
+            font: inherit;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover { background: var(--accent-dark); }
+        button.secondary { background: white; color: var(--accent); }
+        button.secondary:hover { background: var(--soft); }
+        button.danger { border-color: var(--danger); background: white; color: var(--danger); }
+        button.danger:hover { background: #fff3f1; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .toolbar h2 { margin: 0; }
+        .table-wrap { overflow-x: auto; margin-top: 16px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 10px 9px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+        th { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+        td:last-child, th:last-child { text-align: right; }
+        .empty { color: var(--muted); text-align: center; padding: 24px 8px; }
+        .status { min-height: 1.3em; margin: 12px 0 0; color: var(--muted); font-size: .88rem; }
+        .status.error { color: var(--danger); }
+        pre {
+            min-height: 126px;
+            max-height: 360px;
+            overflow: auto;
+            margin: 0;
+            padding: 13px;
+            border-radius: 8px;
+            background: #172521;
+            color: #e6f4ed;
+            font: .82rem/1.5 Consolas, monospace;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        .divider { height: 1px; margin: 20px 0; background: var(--line); }
+        .inline-id { max-width: 150px; }
+        .note { color: var(--muted); font-size: .82rem; line-height: 1.45; }
+
+        @media (max-width: 760px) {
+            .layout { grid-template-columns: 1fr; }
+            main { margin-top: 18px; padding: 0 14px 28px; }
+            header { padding: 23px 18px; }
+        }
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr; }
+            .field.full { grid-column: auto; }
+            .card { padding: 17px; }
+            .toolbar { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Book Management API Tester</h1>
+    <p>A small browser UI for exercising the Book Management System REST endpoints.</p>
+</header>
+
+<main>
+    <section class="card" aria-labelledby="connection-title">
+        <h2 id="connection-title">Connection &amp; credentials</h2>
+        <p class="hint">The API uses HTTP Basic authentication for book reads and admin-only book changes. Credentials stay in this page's memory and are sent only to the API URL below.</p>
+        <div class="grid">
+            <div class="field full">
+                <label for="api-url">API base URL</label>
+                <input id="api-url" type="url" autocomplete="url">
+            </div>
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" autocomplete="username">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" autocomplete="current-password">
+            </div>
+        </div>
+        <div class="actions">
+            <button id="connect-button" type="button">Use credentials &amp; load books</button>
+            <button id="clear-credentials" class="secondary" type="button">Clear credentials</button>
+        </div>
+        <p id="connection-status" class="status" role="status"></p>
+
+        <div class="divider"></div>
+        <h3>Create a user</h3>
+        <p class="hint">POST /api/users is public. Create a USER to read books or an ADMIN to test book mutations.</p>
+        <form id="user-form">
+            <div class="grid">
+                <div class="field">
+                    <label for="new-username">New username</label>
+                    <input id="new-username" required autocomplete="off">
+                </div>
+                <div class="field">
+                    <label for="new-password">New password</label>
+                    <input id="new-password" type="password" required autocomplete="new-password">
+                </div>
+                <div class="field">
+                    <label for="new-role">Role</label>
+                    <select id="new-role">
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit">Create user (POST)</button>
+        </form>
+        <p id="user-status" class="status" role="status"></p>
+    </section>
+
+    <div class="layout" style="margin-top: 18px">
+        <div class="stack">
+            <section class="card" aria-labelledby="books-title">
+                <div class="toolbar">
+                    <h2 id="books-title">Books</h2>
+                    <button id="list-books" class="secondary" type="button">List all (GET)</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Year</th><th>Actions</th></tr></thead>
+                        <tbody id="book-list"><tr><td class="empty" colspan="5">Connect with a USER or ADMIN account to load books.</td></tr></tbody>
+                    </table>
+                </div>
+                <p id="books-status" class="status" role="status"></p>
+            </section>
+
+            <section class="card" aria-labelledby="book-form-title">
+                <h2 id="book-form-title">Create or update a book</h2>
+                <p class="hint">POST /api/books creates a book. Enter an ID to enable PUT /api/books/{id}.</p>
+                <form id="book-form">
+                    <div class="grid">
+                        <div class="field">
+                            <label for="book-id">Book ID (for lookup, update, or delete)</label>
+                            <input id="book-id" inputmode="numeric" type="number" min="1">
+                        </div>
+                        <div class="field">
+                            <label for="book-year">Year published</label>
+                            <input id="book-year" inputmode="numeric" type="number" step="1">
+                        </div>
+                        <div class="field">
+                            <label for="book-title">Title</label>
+                            <input id="book-title" required>
+                        </div>
+                        <div class="field">
+                            <label for="book-author">Author</label>
+                            <input id="book-author" required>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="submit">Create book (POST)</button>
+                        <button id="update-book" class="secondary" type="button">Update book (PUT)</button>
+                    </div>
+                </form>
+
+                <div class="divider"></div>
+                <h3>Get or delete by ID</h3>
+                <div class="actions">
+                    <button id="get-book" class="secondary" type="button">Get by ID (GET)</button>
+                    <button id="delete-book" class="danger" type="button">Delete (DELETE)</button>
+                </div>
+            </section>
+        </div>
+
+        <aside class="card" aria-labelledby="response-title">
+            <h2 id="response-title">Latest API response</h2>
+            <p class="hint">Each action reports its method, endpoint, HTTP status, and response body here.</p>
+            <pre id="response-output" aria-live="polite">No requests yet.</pre>
+            <p class="note">A 401 response usually means the credentials are missing or invalid; 403 means the authenticated account lacks the required role. The API base URL defaults to this page's origin.</p>
+        </aside>
+    </div>
+</main>
+<script src="/app.js" defer></script>
+</body>
+<!--test dummy for unversioned chnages-->
+</html>
